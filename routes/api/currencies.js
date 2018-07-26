@@ -10,6 +10,7 @@ const { promisify } = require('util');
 const getAsync = promisify(client.get).bind(client);
 const hgetallAsync = promisify(client.hgetall).bind(client);
 
+const API_ENDPOINT = 'https://api.cryptonator.com/api/ticker/';
 const ALL_CURRENCIES_PAIR = [
     { code: 'btc-usd', name: 'Bitcoin' },
     { code: 'eth-usd', name: 'Ether' },
@@ -54,8 +55,8 @@ router.get('/:code', async function (req, res, next) {
         if (localTimestamp == undefined || ((parseFloat(localTimestamp) + 30) < Date.now() / 1000)) {
             console.log('GET '+ req.params.code + ' from remote API');
             //Cache api response currency data and local server timestamp into redis and response latest data
-            var apiUrl = 'https://api.cryptonator.com/api/ticker/' + req.params.code;
-            var response = await axios.get(apiUrl, { responseType: 'json' });
+            var apiUrl = API_ENDPOINT + req.params.code;
+            var response = await axios.get(apiUrl, { responseType: 'json', withCredentials: true });
             
             if (response.data.ticker == undefined || response.data.success == false)
                 throw 'API Error, response:' + response;           
