@@ -10,6 +10,10 @@ var apiRouter = require('./routes/api');
 
 var app = express();
 
+var followRedirects = require('follow-redirects');
+followRedirects.maxRedirects = 20;
+followRedirects.maxBodyLength = 20 * 1024 * 1024; // 20 MB
+
 app.use(cors())
 
 app.use(logger('dev'));
