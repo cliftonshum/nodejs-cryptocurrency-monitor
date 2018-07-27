@@ -50,20 +50,26 @@ router.get('/:code', async function (req, res, next) {
 
         var currencyData = {};
         var localTimestamp = await getAsync(req.params.code + '-local-timestamp');
-        var now = Date.now() / 1000;
-
+        
         if (localTimestamp == undefined || ((parseFloat(localTimestamp) + 30) < Date.now() / 1000)) {
+            //Set local timestamp before fetching to prevent concurrent coin request from client
+            client.set(req.params.code + '-local-timestamp', (Date.now() / 1000));
+
             console.log('GET '+ req.params.code + ' from remote API');
             //Cache api response currency data and local server timestamp into redis and response latest data
             var apiUrl = API_ENDPOINT + req.params.code;
-            var response = await axios.get(apiUrl, { responseType: 'json', withCredentials: true });
+            var response = await axios.get(apiUrl, { 
+                responseType: 'json'            
+            });
             
-            if (response.data.ticker == undefined || response.data.success == false)
-                throw 'API Error, response:' + response;           
-
-
-            client.set(req.params.code + '-local-timestamp', (Date.now() / 1000));
-            client.set(req.params.code + '-timestamp', response.data.timestamp);
+            
+            if (response.data.ticker == undefined || response.data.success == false){
+                console.log(response.headers['set-cookie']);
+                throw 'API Error, response:' + response;    
+            }
+                       
+                        
+            client.set(req.params.code + '-timestamp', response.data.timestamp);            
             client.hmset(req.params.code + '-ticker', response.data.ticker);
             res.statusCode = 200;
             return res.json({ timestamp: response.data.timestamp, ticker: response.data.ticker, name: currencyName, status: true });
@@ -78,8 +84,9 @@ router.get('/:code', async function (req, res, next) {
             res.statusCode = 200;
             return res.json(currencyData);
         }
-    } catch (err) {
+    } catch (err) {        
         console.error('Error occurs:' + err);
+        console.error('Stack:' + err.stack);
         res.statusCode = 500;
         return res.json({status: false});        
     }
