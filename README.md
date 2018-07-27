@@ -37,15 +37,15 @@ NODE_PORT=4369 pm2 start -i 4 ./bin/www
 *Backend part
 1. The application will listen on PORT 4369. Once receive api request, the application will check if the pair (e.g. BTC-USD) parameter is exist and is it acceptable in our application. 
 2. It will get the timestamp from Redis and check if the last updated cache timestamp is within 30s
-2a. If within 30s, the application will get the coin data from redis cache and response to client
-2b. If not, the application will call Cryptonator API to get the latest data and store the latest timstamp and data into Redis.
+3. If within 30s, the application will get the coin data from redis cache and response to client
+4. If not, the application will call Cryptonator API to get the latest data and store the latest timstamp and data into Redis.
 
 
 ## Scalability and Minimizing API call Consideration
 While all pair data will be store in the Redis and do not have any in-memory store in the application, you may clone this application into multiple instance to handle the request.
 Since all data which get from the Cyptonator API will be cache in the Redis and the application will not update the data if idle, the API call frequency can be reduced to:
-Maximum: (Number of Coin-pair) per 30s
-Minimum: 0 (No client requests data will not trigger the api call and no scheduled API call)
+- Maximum: (Number of Coin-pair) per 30s
+- Minimum: 0 (No client requests data will not trigger the api call and no scheduled API call)
 
 *Cache lifetime limited to 30s because prices on cryptoncation are updated every 30 seconds,
 
