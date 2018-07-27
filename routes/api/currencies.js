@@ -22,11 +22,12 @@ const ALL_CURRENCIES_PAIR = [
     { code: 'dash-usd', name: 'Dash' },
     { code: 'maid-usd', name: 'MaidSafeeCoin' },
     { code: 'lsk-usd', name: 'Lisk' },
-    { code: 'sjcx-usd', name: 'Storjcoin X' },
-    { code: 'fair-usd', name: 'Faircoin' },
-    { code: 'hmp-usd', name: 'Hempcoin' },
-    { code: 'net-usd', name: 'Netcoin' },
-    { code: 'sphr-usd', name: 'Sphere' }
+    //sjcx-usd pair depercated in cryptonator
+    //{ code: 'sjcx-usd', name: 'Storjcoin X' },
+    { code: 'str-usd', name: 'Stellar' },
+    { code: 'sub-usd', name: 'Subcriptio' },
+    { code: 'apc-usd', name: 'Applecoin' },
+    { code: 'gcr-usd', name: 'GoCoineR' }
 ];
 
 // GET currency with currency code
