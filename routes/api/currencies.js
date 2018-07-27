@@ -4,7 +4,8 @@ const axios = require('axios');
 
 //Redis client
 var redis = require('redis');
-var client = redis.createClient(6379,'redis-node.gmk625.ng.0001.apne1.cache.amazonaws.com');
+//var client = redis.createClient(6379,'redis-node.gmk625.ng.0001.apne1.cache.amazonaws.com');
+var client = redis.createClient();
 
 const { promisify } = require('util');
 const getAsync = promisify(client.get).bind(client);
@@ -59,15 +60,30 @@ router.get('/:code', async function (req, res, next) {
             //Cache api response currency data and local server timestamp into redis and response latest data
             var apiUrl = API_ENDPOINT + req.params.code;
             var response = await axios.get(apiUrl, { 
-                responseType: 'json'            
+                responseType: 'json', 
+                withCredentials: true, 
+                maxRedirects: 0, 
+                validateStatus: function (status) { 
+                    return status >= 200 && status <= 307;
+                }            
             });
             
-            
-            if (response.data.ticker == undefined || response.data.success == false){
+            //Workaround: Cryptonator API response Http status 307 Redirection with 'set-cookie' header
+            //However axios will not set this header before redirect to same url
+            //Therefore the following case will handle 307 with addition header
+            //Ref: https://github.com/axios/axios/issues/953
+            if (response.status == 307){
                 console.log(response.headers['set-cookie']);
+                response = await axios.get(apiUrl, { 
+                    responseType: 'json', 
+                    withCredentials: true, 
+                    headers: { Cookie: response.headers['set-cookie']}
+                })
+            };
+            
+            if (response.data.ticker == undefined || response.data.success == false){                
                 throw 'API Error, response:' + response;    
             }
-                       
                         
             client.set(req.params.code + '-timestamp', response.data.timestamp);            
             client.hmset(req.params.code + '-ticker', response.data.ticker);
@@ -86,7 +102,6 @@ router.get('/:code', async function (req, res, next) {
         }
     } catch (err) {        
         console.error('Error occurs:' + err);
-        console.error('Stack:' + err.stack);
         res.statusCode = 500;
         return res.json({status: false});        
     }
