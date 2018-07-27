@@ -109,7 +109,7 @@ router.get('/:code', async function (req, res, next) {
 });
 
 
-// GET currency with currency code
+// GET Dummy currency with currency code for testing
 router.get('/test/:code', function (req, res, next) {
     return res.json({ 
         timestamp: 10000000, 
@@ -118,7 +118,7 @@ router.get('/test/:code', function (req, res, next) {
             price:'8220.10628787',
             volume:'50656.80650633'
         },
-        name: req.params.code
+        name: req.params.code + 'Testing'
     });
 });
 
