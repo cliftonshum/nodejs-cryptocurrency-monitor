@@ -4,8 +4,8 @@ const axios = require('axios');
 
 //Redis client
 var redis = require('redis');
-//var client = redis.createClient(6379,'redis-node.gmk625.ng.0001.apne1.cache.amazonaws.com');
-var client = redis.createClient();
+var client = redis.createClient(6379,'redis-node.gmk625.ng.0001.apne1.cache.amazonaws.com');
+//var client = redis.createClient();
 
 const { promisify } = require('util');
 const getAsync = promisify(client.get).bind(client);
